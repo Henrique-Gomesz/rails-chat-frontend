@@ -18,8 +18,7 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = await login(email, password);
-      localStorage.setItem("token", token);
+      await login(email, password);
       window.location.href = "/dashboard";
     } catch (error) {
       setError("Invalid email or password");

@@ -1,7 +1,9 @@
+import { jwtDecode } from "jwt-decode";
+
 export const login = async (
   email: string,
   password: string,
-): Promise<string> => {
+): Promise<void> => {
   const response = await fetch("http://127.0.0.1:3000/login", {
     method: "POST",
     headers: {
@@ -15,5 +17,7 @@ export const login = async (
   }
 
   const data = await response.json();
-  return data.token;
+  const decodedToken = jwtDecode(data.token) as { username: string };
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("username", decodedToken.username);
 };

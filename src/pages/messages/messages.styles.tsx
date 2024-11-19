@@ -3,6 +3,8 @@ import styled from "styled-components";
 export const Container = styled.div`
   display: flex;
   height: 100vh;
+  width: 100vw;
+
 `;
 
 export const Sidebar = styled.div`
@@ -70,6 +72,7 @@ export const ChatSection = styled.div`
   display: flex;
   flex-direction: column;
   padding: 20px;
+
 `;
 
 export const ChatHeader = styled.h2`
@@ -82,6 +85,18 @@ export const Messages = styled.div`
   flex: 1;
   overflow-y: auto;
   margin-bottom: 20px;
+  &::-webkit-scrollbar {
+    width: 6px; /* Scrollbar width for webkit-based browsers */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 export const MessageContainer = styled.div`
@@ -94,6 +109,13 @@ export const Message = styled.div`
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
+  line-break: anywhere;
+`;
+
+export const MessageDate = styled.div`
+  color: gray;
+  font-size: 12px;
+ 
 `;
 
 export const AuthorMessage = styled.div`

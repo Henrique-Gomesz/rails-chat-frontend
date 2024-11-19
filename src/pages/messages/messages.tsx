@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   createConversation,
   getAllUsernames,
@@ -19,6 +19,7 @@ import {
   Input,
   Message,
   MessageContainer,
+  MessageDate,
   MessageInput,
   Messages,
   Modal,
@@ -31,9 +32,10 @@ import {
   UserItem,
   UserList,
 } from "./messages.styles";
+import { DateFormat } from "../../constants";
 
 export const MessagesPage: React.FC = () => {
-  const [selectedChat, setSelectedChat] = useState<Conversation | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [newChatName, setNewChatName] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -41,10 +43,31 @@ export const MessagesPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [message, setMessage] = useState<string>("");
 
+  const chatListRef = useRef<HTMLDivElement>(null);
+
+  const selectedChat = useMemo(() => {
+    return conversations.find((chat) => chat.conversationId === selectedChatId);
+  }, [conversations, selectedChatId]);
+
   useEffect(() => {
     getConversations().then((data) => setConversations(data));
     getAllUsernames().then((data) => setUsernames(data));
   }, []);
+
+  useEffect(() => {
+    if (chatListRef.current) {
+      chatListRef.current.scrollTo({
+        behavior: "smooth",
+        top: chatListRef.current.scrollHeight,
+      });
+    }
+  }, [conversations]);
+
+  useEffect(() => {
+    if (chatListRef.current) {
+      chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+    }
+  }, [selectedChatId]);
 
   const handleUserSelection = (user: string) => {
     setSelectedUsers((prev) =>
@@ -55,7 +78,8 @@ export const MessagesPage: React.FC = () => {
   const handleCreateChat = () => {
     if (newChatName.trim() && selectedUsers.length) {
       createConversation(selectedUsers, newChatName).then((newConversation) => {
-        setConversations((prev) => [...prev, newConversation]);
+        const newConversations = [...conversations, newConversation];
+        setConversations(newConversations);
         setShowModal(false);
         setSelectedUsers([]);
         setNewChatName("");
@@ -64,14 +88,26 @@ export const MessagesPage: React.FC = () => {
   };
 
   function handleChangeChat(chat: Conversation) {
-    setSelectedChat(chat);
+    setSelectedChatId(chat.conversationId);
     setMessage("");
   }
 
   function onSendMessage() {
     if (selectedChat) {
-      sendMessage(message, selectedChat?.conversationId).then(() => {
-        getConversations().then((data) => setConversations(data));
+      sendMessage(message, selectedChat?.conversationId).then((newMessage) => {
+        const updatedConversation = conversations.map((chat) => {
+          if (chat.conversationId === selectedChat.conversationId) {
+            chat.messages.push({
+              author: "as",
+              createdAt: new Date(newMessage.created_at),
+              message: newMessage.message,
+            });
+          }
+
+          return chat;
+        });
+        setConversations([...updatedConversation]);
+        setMessage("");
       });
     }
   }
@@ -102,11 +138,16 @@ export const MessagesPage: React.FC = () => {
           ? (
             <>
               <ChatHeader>{selectedChat.name}</ChatHeader>
-              <Messages>
+              <Messages ref={chatListRef}>
                 {selectedChat.messages.map((message, index) => (
                   <MessageContainer>
                     <AuthorMessage>{message.author}</AuthorMessage>
-                    <Message key={index}>{message.message}</Message>
+                    <Message key={index}>
+                      {message.message}
+                      <MessageDate>
+                        {DateFormat.format(message.createdAt)}
+                      </MessageDate>
+                    </Message>
                   </MessageContainer>
                 ))}
               </Messages>

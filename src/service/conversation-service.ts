@@ -1,6 +1,7 @@
 import { URL } from "../constants";
 import { Conversation } from "../types/conversation";
 import { ConversationResponse } from "./responses/conversation-response";
+import { NewMessageResponse } from "./responses/new-message-response";
 
 export async function getAllUsernames(): Promise<string[]> {
   const response = await fetch(`${URL}/user/list`, {
@@ -41,18 +42,14 @@ export async function createConversation(
 
   const data = await response.json() as ConversationResponse;
 
+  console.log(data);
+
   return {
     id: data.id,
     name: data.name,
     conversationId: data.conversation_uuid,
     participants: data.conversation_participants.map((p) => p.user.username),
-    messages: data.messages.map((message) => {
-      return {
-        author: message.user.username,
-        message: message.message,
-        createdAt: new Date(message.created_at),
-      };
-    }),
+    messages: [],
     createdAt: new Date(data.created_at),
   };
 }
@@ -92,7 +89,10 @@ export async function getConversations(): Promise<Conversation[]> {
   });
 }
 
-export async function sendMessage(message: string, conversationId: string) {
+export async function sendMessage(
+  message: string,
+  conversationId: string,
+): Promise<NewMessageResponse> {
   const response = await fetch(
     `${URL}/conversations/${conversationId}/messages`,
     {
@@ -110,4 +110,8 @@ export async function sendMessage(message: string, conversationId: string) {
   if (!response.ok) {
     throw new Error("Failed to send message");
   }
+
+  const data = await response.json() as NewMessageResponse;
+
+  return data;
 }
