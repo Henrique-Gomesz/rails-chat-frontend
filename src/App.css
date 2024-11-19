@@ -1,0 +1,18 @@
+/* Reseta a margem e o padding de todos os elementos */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilo global para o corpo da página */
+body {
+  font-family: "Arial", sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  color: #333;
+  margin: 0;
+  transition: background-color 0.3s ease;
+}
