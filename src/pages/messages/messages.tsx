@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
+  createConversation,
+  getAllUsernames,
+  getConversations,
+  sendMessage,
+} from "../../service/conversation-service";
+import { Conversation } from "../../types/conversation";
+import {
   AddChatButton,
+  AuthorMessage,
   Button,
   ChatHeader,
   ChatItem,
@@ -10,6 +18,7 @@ import {
   Container,
   Input,
   Message,
+  MessageContainer,
   MessageInput,
   Messages,
   Modal,
@@ -22,35 +31,20 @@ import {
   UserItem,
   UserList,
 } from "./messages.styles";
-import { getAllUsernames } from "../../service/conversation-service";
-
-interface Chat {
-  id: number;
-  name: string;
-  messages: string[];
-}
 
 export const MessagesPage: React.FC = () => {
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [selectedChat, setSelectedChat] = useState<Conversation | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [newChatName, setNewChatName] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [usernames,setUsernames] = useState<string[]>([]);
+  const [usernames, setUsernames] = useState<string[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
+    getConversations().then((data) => setConversations(data));
     getAllUsernames().then((data) => setUsernames(data));
-  },[])
-
-  const users: string[] = ["João", "Maria", "Carlos", "Ana", "Felipe"];
-
-  const chats: Chat[] = [
-    { id: 1, name: "João", messages: ["Oi, tudo bem?", "Como você está?"] },
-    {
-      id: 2,
-      name: "Maria",
-      messages: ["Oi, Henrique!", "Como vai o projeto?"],
-    },
-  ];
+  }, []);
 
   const handleUserSelection = (user: string) => {
     setSelectedUsers((prev) =>
@@ -60,26 +54,40 @@ export const MessagesPage: React.FC = () => {
 
   const handleCreateChat = () => {
     if (newChatName.trim() && selectedUsers.length) {
-      const newChat: Chat = {
-        id: chats.length + 1,
-        name: newChatName,
-        messages: [],
-      };
-      chats.push(newChat);
-      setShowModal(false);
-      setSelectedUsers([]);
-      setNewChatName("");
+      createConversation(selectedUsers, newChatName).then((newConversation) => {
+        setConversations((prev) => [...prev, newConversation]);
+        setShowModal(false);
+        setSelectedUsers([]);
+        setNewChatName("");
+      });
     }
   };
+
+  function handleChangeChat(chat: Conversation) {
+    setSelectedChat(chat);
+    setMessage("");
+  }
+
+  function onSendMessage() {
+    if (selectedChat) {
+      sendMessage(message, selectedChat?.conversationId).then(() => {
+        getConversations().then((data) => setConversations(data));
+      });
+    }
+  }
+
+  function onMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setMessage(event.target.value);
+  }
 
   return (
     <Container>
       <Sidebar>
         <ChatList>
-          {chats.map((chat) => (
+          {conversations.map((chat) => (
             <ChatItem
               key={chat.id}
-              onClick={() => setSelectedChat(chat)}
+              onClick={() => handleChangeChat(chat)}
             >
               {chat.name}
             </ChatItem>
@@ -96,10 +104,19 @@ export const MessagesPage: React.FC = () => {
               <ChatHeader>{selectedChat.name}</ChatHeader>
               <Messages>
                 {selectedChat.messages.map((message, index) => (
-                  <Message key={index}>{message}</Message>
+                  <MessageContainer>
+                    <AuthorMessage>{message.author}</AuthorMessage>
+                    <Message key={index}>{message.message}</Message>
+                  </MessageContainer>
                 ))}
               </Messages>
-              <MessageInput placeholder="Digite uma mensagem..." />
+
+              <MessageInput
+                onChange={onMessageChange}
+                value={message}
+                placeholder="Digite uma mensagem..."
+              />
+              <Button onClick={onSendMessage}>&gt;</Button>
             </>
           )
           : <NoChatSelected>Selecione uma conversa</NoChatSelected>}

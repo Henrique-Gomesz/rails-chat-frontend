@@ -16,6 +16,23 @@ export const Sidebar = styled.div`
 export const ChatList = styled.div`
   list-style: none;
   padding: 0;
+  max-height: calc(100vh - 80px); /* Adjust height based on header or padding */
+  overflow-y: auto;
+  scrollbar-width: thin; /* For modern browsers */
+  scrollbar-color: #ccc transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px; /* Scrollbar width for webkit-based browsers */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 export const ChatItem = styled.div`
@@ -33,7 +50,7 @@ export const ChatItem = styled.div`
 
 export const AddChatButton = styled.button`
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   background-color: #4caf50;
   color: white;
   border: none;
@@ -67,10 +84,21 @@ export const Messages = styled.div`
   margin-bottom: 20px;
 `;
 
+export const MessageContainer = styled.div`
+  flex-direction: column;
+  display: flex;
+`;
+
 export const Message = styled.div`
-  background-color: #f1f1f1;
+  background-color: #d4d4d4;
   padding: 10px;
   border-radius: 5px;
+  margin-bottom: 10px;
+`;
+
+export const AuthorMessage = styled.div`
+  border-radius: 5px;
+  font-weight: bold;
   margin-bottom: 10px;
 `;
 

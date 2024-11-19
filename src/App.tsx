@@ -8,7 +8,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-      <Route path="*" element={<LoginPage />} />
+        <Route path="*" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"
