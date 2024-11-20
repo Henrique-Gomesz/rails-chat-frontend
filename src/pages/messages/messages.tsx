@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { CiLogout } from "react-icons/ci";
+import { FormatDate } from "../../constants";
 import {
   createConversation,
   getAllUsernames,
@@ -10,17 +12,20 @@ import {
   AddChatButton,
   AuthorMessage,
   Button,
+  ChatDate,
   ChatHeader,
   ChatItem,
   ChatList,
   ChatSection,
   Checkbox,
   Container,
+  ConversationButtonsContainer,
   Input,
   Message,
   MessageContainer,
   MessageDate,
   MessageInput,
+  MessageInputContainer,
   Messages,
   Modal,
   ModalBody,
@@ -28,11 +33,15 @@ import {
   ModalHeader,
   ModalOverlay,
   NoChatSelected,
+  Participants,
+  ParticipantsContainer,
   Sidebar,
   UserItem,
   UserList,
 } from "./messages.styles";
-import { DateFormat } from "../../constants";
+import ChatSkeleton from "../../components/skeletons/skeleton-chat";
+
+const username = localStorage.getItem("username");
 
 export const MessagesPage: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string>("");
@@ -42,6 +51,8 @@ export const MessagesPage: React.FC = () => {
   const [usernames, setUsernames] = useState<string[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [message, setMessage] = useState<string>("");
+  const [lockSendMessage, setLockSendMessage] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const chatListRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +61,9 @@ export const MessagesPage: React.FC = () => {
   }, [conversations, selectedChatId]);
 
   useEffect(() => {
-    getConversations().then((data) => setConversations(data));
+    getConversations().then((data) => setConversations(data)).finally(() => {
+      setIsLoading(false);
+    });
     getAllUsernames().then((data) => setUsernames(data));
   }, []);
 
@@ -92,13 +105,15 @@ export const MessagesPage: React.FC = () => {
     setMessage("");
   }
 
-  function onSendMessage() {
+  function onSendMessage(e: React.FormEvent) {
+    setLockSendMessage(true);
+    e.preventDefault();
     if (selectedChat) {
       sendMessage(message, selectedChat?.conversationId).then((newMessage) => {
         const updatedConversation = conversations.map((chat) => {
           if (chat.conversationId === selectedChat.conversationId) {
             chat.messages.push({
-              author: "as",
+              author: localStorage.getItem("username") || "Eu",
               createdAt: new Date(newMessage.created_at),
               message: newMessage.message,
             });
@@ -108,6 +123,8 @@ export const MessagesPage: React.FC = () => {
         });
         setConversations([...updatedConversation]);
         setMessage("");
+      }).finally(() => {
+        setLockSendMessage(false);
       });
     }
   }
@@ -116,54 +133,98 @@ export const MessagesPage: React.FC = () => {
     setMessage(event.target.value);
   }
 
-  return (
-    <Container>
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+  }
+
+  function renderChatList() {
+    return (
       <Sidebar>
         <ChatList>
-          {conversations.map((chat) => (
+          {isLoading ? <ChatSkeleton /> : conversations.map((chat) => (
             <ChatItem
               key={chat.id}
               onClick={() => handleChangeChat(chat)}
             >
               {chat.name}
+              <ChatDate>Criado em</ChatDate>
+              <ChatDate>{FormatDate(chat.createdAt, false)}</ChatDate>
             </ChatItem>
           ))}
         </ChatList>
-        <AddChatButton onClick={() => setShowModal(true)}>
-          +
-        </AddChatButton>
+        <ConversationButtonsContainer>
+          <CiLogout
+            onClick={logout}
+            cursor={"pointer"}
+            size={28}
+            color="#54141c"
+          />
+
+          <AddChatButton onClick={() => setShowModal(true)}>
+            +
+          </AddChatButton>
+        </ConversationButtonsContainer>
       </Sidebar>
+    );
+  }
+
+  function renderChatSection() {
+    return (
       <ChatSection>
         {selectedChat
           ? (
             <>
               <ChatHeader>{selectedChat.name}</ChatHeader>
+
+              <Participants>
+                Participantes: {selectedChat.participants.join(", ")}
+              </Participants>
+
               <Messages ref={chatListRef}>
                 {selectedChat.messages.map((message, index) => (
                   <MessageContainer>
-                    <AuthorMessage>{message.author}</AuthorMessage>
-                    <Message key={index}>
+                    {message.author !== username && (
+                      <AuthorMessage>{message.author}</AuthorMessage>
+                    )}
+                    <Message
+                      isUserMessage={message.author === username}
+                      key={index}
+                    >
                       {message.message}
                       <MessageDate>
-                        {DateFormat.format(message.createdAt)}
+                        {FormatDate(message.createdAt)}
                       </MessageDate>
                     </Message>
                   </MessageContainer>
                 ))}
               </Messages>
 
-              <MessageInput
-                onChange={onMessageChange}
-                value={message}
-                placeholder="Digite uma mensagem..."
-              />
-              <Button onClick={onSendMessage}>&gt;</Button>
+              <MessageInputContainer>
+                <MessageInput
+                  onChange={onMessageChange}
+                  value={message}
+                  placeholder="Digite uma mensagem..."
+                />
+                <Button
+                  disabled={lockSendMessage}
+                  type="submit"
+                  onClick={onSendMessage}
+                >
+                  &gt;
+                </Button>
+              </MessageInputContainer>
             </>
           )
           : <NoChatSelected>Selecione uma conversa</NoChatSelected>}
       </ChatSection>
+    );
+  }
 
-      {showModal && (
+  function renderModal() {
+    if (showModal) {
+      return (
         <ModalOverlay>
           <Modal>
             <ModalHeader>Criar Nova Conversa</ModalHeader>
@@ -175,16 +236,18 @@ export const MessagesPage: React.FC = () => {
                 onChange={(e) => setNewChatName(e.target.value)}
               />
               <UserList>
-                {usernames.map((user) => (
-                  <UserItem key={user}>
-                    <Checkbox
-                      type="checkbox"
-                      checked={selectedUsers.includes(user)}
-                      onChange={() => handleUserSelection(user)}
-                    />
-                    {user}
-                  </UserItem>
-                ))}
+                {[
+                  usernames.map((user) => (
+                    <UserItem key={user}>
+                      <Checkbox
+                        type="checkbox"
+                        checked={selectedUsers.includes(user)}
+                        onChange={() => handleUserSelection(user)}
+                      />
+                      {user}
+                    </UserItem>
+                  )),
+                ]}
               </UserList>
               <ModalFooter>
                 <Button onClick={handleCreateChat}>Criar Conversa</Button>
@@ -193,7 +256,15 @@ export const MessagesPage: React.FC = () => {
             </ModalBody>
           </Modal>
         </ModalOverlay>
-      )}
+      );
+    }
+  }
+
+  return (
+    <Container>
+      {renderChatList()}
+      {renderChatSection()}
+      {renderModal()}
     </Container>
   );
 };

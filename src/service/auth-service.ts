@@ -21,3 +21,23 @@ export const login = async (
   localStorage.setItem("token", data.token);
   localStorage.setItem("username", decodedToken.username);
 };
+
+export const signup = async (
+  email: string,
+  username: string,
+  password: string,
+) => {
+  const response = await fetch("http://127.0.0.1:3000/user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user: { email, password, username } }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+};

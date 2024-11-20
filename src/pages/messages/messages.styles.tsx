@@ -13,6 +13,8 @@ export const Sidebar = styled.div`
   padding: 20px;
   border-right: 1px solid #ddd;
   position: relative;
+display: flex;
+  flex-direction: column;
 `;
 
 export const ChatList = styled.div`
@@ -50,20 +52,33 @@ export const ChatItem = styled.div`
   }
 `;
 
+export const ChatDate = styled.div`
+  color: gray;
+  font-size: 12px;
+`;
+
+export const ConversationButtonsContainer = styled.div`
+gap: 16px;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+margin-top: auto
+`;
+
 export const AddChatButton = styled.button`
-  position: absolute;
-  bottom: 10px;
-  background-color: #4caf50;
+  background-color: #cb141c;
   color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   border: none;
-  display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
-
   &:hover {
-    background-color: #45a049;
+    background-color: #a5141c
   }
 `;
 
@@ -76,9 +91,20 @@ export const ChatSection = styled.div`
 `;
 
 export const ChatHeader = styled.h2`
-  margin: 0 0 20px;
   font-size: 24px;
   color: #333;
+`;
+
+export const ParticipantsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+`;
+
+export const Participants = styled.p`
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: #8f8f8f;
 `;
 
 export const Messages = styled.div`
@@ -104,8 +130,8 @@ export const MessageContainer = styled.div`
   display: flex;
 `;
 
-export const Message = styled.div`
-  background-color: #d4d4d4;
+export const Message = styled.div<{ isUserMessage: boolean }>`
+  background-color: ${(props) => props.isUserMessage ? "#fafafa" : "#dddcdc"};
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -115,13 +141,19 @@ export const Message = styled.div`
 export const MessageDate = styled.div`
   color: gray;
   font-size: 12px;
- 
 `;
 
 export const AuthorMessage = styled.div`
   border-radius: 5px;
   font-weight: bold;
   margin-bottom: 10px;
+`;
+
+export const MessageInputContainer = styled.form`
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-direction: row;
 `;
 
 export const MessageInput = styled.input`
@@ -181,6 +213,20 @@ export const Input = styled.input`
 export const UserList = styled.ul`
   list-style: none;
   padding: 0;
+  overflow-y: auto;
+  max-height: 200px;
+  &::-webkit-scrollbar {
+    width: 6px; /* Scrollbar width for webkit-based browsers */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 export const UserItem = styled.li`
@@ -201,13 +247,13 @@ export const ModalFooter = styled.div`
 
 export const Button = styled.button`
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #c81418;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #a5141c
   }
 `;
