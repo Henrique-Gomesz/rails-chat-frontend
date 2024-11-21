@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { signup } from "../../service/auth-service";
+import { useNavigate } from "react-router-dom";
 
 export const useSignup = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -30,14 +33,14 @@ export const useSignup = () => {
       },
     )
       .then(() => {
-        window.location.href = "/login";
+        navigate("/login");
       }).catch((error) => {
         setError(error.message);
       });
   };
 
   function goBack() {
-    window.location.href = "/login";
+    navigate("/login");
   }
 
   return {

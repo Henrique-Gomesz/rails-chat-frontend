@@ -8,6 +8,7 @@ import {
 import { Conversation } from "../../types/conversation";
 import { useAtom } from "jotai";
 import { conversationsAtom } from "../../store/store";
+import { useNavigate } from "react-router-dom";
 
 type UseMessagesHook = {
   conversations: Conversation[];
@@ -31,6 +32,7 @@ type UseMessagesHook = {
 };
 
 export const useMessagesHook = (): UseMessagesHook => {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useAtom(conversationsAtom);
   const [selectedChatId, setSelectedChatId] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -134,7 +136,7 @@ export const useMessagesHook = (): UseMessagesHook => {
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
-    window.location.href = "/login";
+    navigate("/login");
   }
 
   return {

@@ -10,7 +10,7 @@ import {
   Label,
   SignupContainer,
   Title,
-} from "./signup-styles";
+} from "./signup.styles";
 
 export const SignupPage = () => {
   const { error, formData, goBack, handleChange, handleSubmit } = useSignup();

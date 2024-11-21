@@ -14,6 +14,8 @@ export const Form = styled.form`
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
+  display: flex;
+  flex-direction: column;
   max-width: 400px;
 `;
 
@@ -26,6 +28,8 @@ export const Title = styled.h2`
 
 export const InputGroup = styled.div`
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const Label = styled.label`
@@ -35,7 +39,6 @@ export const Label = styled.label`
 `;
 
 export const Input = styled.input`
-  width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
   border: 1px solid #ccc;

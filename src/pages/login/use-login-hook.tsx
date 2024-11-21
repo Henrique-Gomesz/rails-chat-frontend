@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { login } from "../../service/auth-service";
+import { useNavigate } from "react-router-dom";
 
 type UseLogin = {
   email: string;
@@ -16,6 +17,7 @@ export const useLogin = (): UseLogin => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   function onChangeEmail(event: React.ChangeEvent<HTMLInputElement>) {
     setEmail(event.target.value);
@@ -36,14 +38,14 @@ export const useLogin = (): UseLogin => {
           error: "E-mail ou senha inválidos",
         },
       );
-      window.location.href = "/dashboard";
+      navigate("/messages");
     } catch (error) {
       setError("E-mail ou senha inválidos");
     }
   };
 
   function signUp() {
-    window.location.href = "/signup";
+    navigate("/signup");
   }
 
   return {
