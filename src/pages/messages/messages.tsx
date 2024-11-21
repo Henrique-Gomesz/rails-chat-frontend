@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
 import { CiLogout } from "react-icons/ci";
+import { MainScreen } from "../../components/main-screen/main-screen";
+import ChatSkeleton from "../../components/skeletons/skeleton-chat";
 import { FormatDate } from "../../constants";
-import {
-  createConversation,
-  getAllUsernames,
-  getConversations,
-  sendMessage,
-} from "../../service/conversation-service";
-import { Conversation } from "../../types/conversation";
+import { useWebsockets } from "../../hooks/use-websockets";
 import {
   AddChatButton,
   AuthorMessage,
@@ -34,110 +30,36 @@ import {
   ModalOverlay,
   NoChatSelected,
   Participants,
-  ParticipantsContainer,
   Sidebar,
   UserItem,
   UserList,
 } from "./messages.styles";
-import ChatSkeleton from "../../components/skeletons/skeleton-chat";
+import { useMessagesHook } from "./use-messages-hook";
 
 const username = localStorage.getItem("username");
 
 export const MessagesPage: React.FC = () => {
-  const [selectedChatId, setSelectedChatId] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [newChatName, setNewChatName] = useState<string>("");
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [usernames, setUsernames] = useState<string[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [message, setMessage] = useState<string>("");
-  const [lockSendMessage, setLockSendMessage] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const chatListRef = useRef<HTMLDivElement>(null);
-
-  const selectedChat = useMemo(() => {
-    return conversations.find((chat) => chat.conversationId === selectedChatId);
-  }, [conversations, selectedChatId]);
-
-  useEffect(() => {
-    getConversations().then((data) => setConversations(data)).finally(() => {
-      setIsLoading(false);
-    });
-    getAllUsernames().then((data) => setUsernames(data));
-  }, []);
-
-  useEffect(() => {
-    if (chatListRef.current) {
-      chatListRef.current.scrollTo({
-        behavior: "smooth",
-        top: chatListRef.current.scrollHeight,
-      });
-    }
-  }, [conversations]);
-
-  useEffect(() => {
-    if (chatListRef.current) {
-      chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
-    }
-  }, [selectedChatId]);
-
-  const handleUserSelection = (user: string) => {
-    setSelectedUsers((prev) =>
-      prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user]
-    );
-  };
-
-  const handleCreateChat = () => {
-    if (newChatName.trim() && selectedUsers.length) {
-      createConversation(selectedUsers, newChatName).then((newConversation) => {
-        const newConversations = [...conversations, newConversation];
-        setConversations(newConversations);
-        setShowModal(false);
-        setSelectedUsers([]);
-        setNewChatName("");
-      });
-    }
-  };
-
-  function handleChangeChat(chat: Conversation) {
-    setSelectedChatId(chat.conversationId);
-    setMessage("");
-  }
-
-  function onSendMessage(e: React.FormEvent) {
-    setLockSendMessage(true);
-    e.preventDefault();
-    if (selectedChat) {
-      sendMessage(message, selectedChat?.conversationId).then((newMessage) => {
-        const updatedConversation = conversations.map((chat) => {
-          if (chat.conversationId === selectedChat.conversationId) {
-            chat.messages.push({
-              author: localStorage.getItem("username") || "Eu",
-              createdAt: new Date(newMessage.created_at),
-              message: newMessage.message,
-            });
-          }
-
-          return chat;
-        });
-        setConversations([...updatedConversation]);
-        setMessage("");
-      }).finally(() => {
-        setLockSendMessage(false);
-      });
-    }
-  }
-
-  function onMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setMessage(event.target.value);
-  }
-
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    window.location.href = "/login";
-  }
+  useWebsockets();
+  const {
+    chatListRef,
+    conversations,
+    handleChangeChat,
+    handleCreateChat,
+    handleUserSelection,
+    isLoading,
+    lockSendMessage,
+    logout,
+    message,
+    newChatName,
+    onChangeChatName,
+    onMessageChange,
+    handleModal,
+    onSendMessage,
+    selectedChat,
+    selectedUsers,
+    showModal,
+    usernames,
+  } = useMessagesHook();
 
   function renderChatList() {
     return (
@@ -162,7 +84,7 @@ export const MessagesPage: React.FC = () => {
             color="#54141c"
           />
 
-          <AddChatButton onClick={() => setShowModal(true)}>
+          <AddChatButton onClick={handleModal}>
             +
           </AddChatButton>
         </ConversationButtonsContainer>
@@ -184,7 +106,7 @@ export const MessagesPage: React.FC = () => {
 
               <Messages ref={chatListRef}>
                 {selectedChat.messages.map((message, index) => (
-                  <MessageContainer>
+                  <MessageContainer key={`${message.author}-index`}>
                     {message.author !== username && (
                       <AuthorMessage>{message.author}</AuthorMessage>
                     )}
@@ -233,16 +155,17 @@ export const MessagesPage: React.FC = () => {
                 type="text"
                 placeholder="Nome da conversa"
                 value={newChatName}
-                onChange={(e) => setNewChatName(e.target.value)}
+                onChange={onChangeChatName}
               />
               <UserList>
                 {[
-                  usernames.map((user) => (
-                    <UserItem key={user}>
+                  usernames.map((user, index) => (
+                    <UserItem key={`${user}-${index}`}>
                       <Checkbox
                         type="checkbox"
                         checked={selectedUsers.includes(user)}
-                        onChange={() => handleUserSelection(user)}
+                        onChange={() =>
+                          handleUserSelection(user)}
                       />
                       {user}
                     </UserItem>
@@ -251,7 +174,7 @@ export const MessagesPage: React.FC = () => {
               </UserList>
               <ModalFooter>
                 <Button onClick={handleCreateChat}>Criar Conversa</Button>
-                <Button onClick={() => setShowModal(false)}>Fechar</Button>
+                <Button onClick={handleModal}>Fechar</Button>
               </ModalFooter>
             </ModalBody>
           </Modal>
@@ -261,10 +184,12 @@ export const MessagesPage: React.FC = () => {
   }
 
   return (
-    <Container>
-      {renderChatList()}
-      {renderChatSection()}
-      {renderModal()}
-    </Container>
+    <MainScreen>
+      <Container>
+        {renderChatList()}
+        {renderChatSection()}
+        {renderModal()}
+      </Container>
+    </MainScreen>
   );
 };
