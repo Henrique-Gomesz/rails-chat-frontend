@@ -1,10 +1,11 @@
 import { jwtDecode } from "jwt-decode";
+import { HTTP_URL } from "../constants";
 
 export const login = async (
   email: string,
   password: string,
 ): Promise<void> => {
-  const response = await fetch("http://127.0.0.1:3000/login", {
+  const response = await fetch(`${HTTP_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -27,7 +28,7 @@ export const signup = async (
   username: string,
   password: string,
 ) => {
-  const response = await fetch("http://127.0.0.1:3000/user", {
+  const response = await fetch(`${HTTP_URL}/user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

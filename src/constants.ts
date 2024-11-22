@@ -1,4 +1,6 @@
-export const URL = "https://rails-chat-backend-413396343142.southamerica-east1.run.app";
+const BASE_URL = "rails-chat-backend-413396343142.southamerica-east1.run.app";
+export const HTTP_URL = `https://${BASE_URL}`;
+export const WS_URL = `wss://${BASE_URL}/cable`;
 
 export function FormatDate(date: Date, withTime = true): string {
   if (!withTime) {

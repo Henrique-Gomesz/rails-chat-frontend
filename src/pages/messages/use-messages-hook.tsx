@@ -54,7 +54,6 @@ export const useMessagesHook = (): UseMessagesHook => {
   }
 
   useEffect(() => {
-    console.log("1asd");
     getConversations().then((data) => {
       setConversations(() => data);
     }).finally(() => {

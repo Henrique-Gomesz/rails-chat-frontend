@@ -200,10 +200,11 @@ export const ModalHeader = styled.h3`
 
 export const ModalBody = styled.div`
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const Input = styled.input`
-  width: 100%;
   padding: 10px;
   margin-bottom: 20px;
   border-radius: 5px;

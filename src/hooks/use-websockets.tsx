@@ -1,12 +1,12 @@
 import ActionCable from "actioncable";
 import { useAtom } from "jotai";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ConversationResponse } from "../service/responses/conversation-response";
 import { NewMessageResponse } from "../service/responses/new-message-response";
 import { conversationsAtom } from "../store/store";
 import { Conversation } from "../types/conversation";
-const token = localStorage.getItem("token");
+import { WS_URL } from "../constants";
 
 type NewConversationPayload = {
   action: "new_conversation";
@@ -18,16 +18,11 @@ type NewMessagePayload = {
   body: NewMessageResponse;
 };
 
-const websocket = ActionCable.createConsumer(
-  `ws://127.0.0.1:3000/cable?token=${token}`,
-);
-
-const channel = websocket.subscriptions.create({
-  channel: "ActivitiesChannel",
-});
-
 export const useWebsockets = () => {
   const [conversations, setConversations] = useAtom(conversationsAtom);
+  const [channel, setChannel] = useState<
+    ActionCable.Channel & ActionCable.CreateMixin | undefined
+  >(undefined);
   const handleNewMessage = useCallback((data: NewMessagePayload) => {
     const targetConversation = conversations.find((chat) =>
       chat.conversationId === data.body.conversation_uuid
@@ -72,14 +67,29 @@ export const useWebsockets = () => {
   }, [conversations]);
 
   useEffect(() => {
-    channel.connected = () => console.log("connected");
-    channel.received = receiveMessage;
+    const token = localStorage.getItem("token");
+
+    const websocket = ActionCable.createConsumer(
+      `${WS_URL}?token=${token}`,
+    );
+
+    const channel = websocket.subscriptions.create({
+      channel: "ActivitiesChannel",
+    });
+
+    setChannel(channel);
+  }, []);
+
+  useEffect(() => {
+    if (channel) {
+      channel.connected = () => console.log("connected");
+      channel.received = receiveMessage;
+    }
   }, [conversations]);
 
   function receiveMessage(
     data: NewConversationPayload | NewMessagePayload,
   ) {
-    console.log(data);
     if (data.action === "new_conversation") {
       handleNewChat(data);
     }

@@ -1,10 +1,10 @@
-import { URL } from "../constants";
+import { HTTP_URL } from "../constants";
 import { Conversation } from "../types/conversation";
 import { ConversationResponse } from "./responses/conversation-response";
 import { NewMessageResponse } from "./responses/new-message-response";
 
 export async function getAllUsernames(): Promise<string[]> {
-  const response = await fetch(`${URL}/user/list`, {
+  const response = await fetch(`${HTTP_URL}/user/list`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -24,7 +24,7 @@ export async function createConversation(
   usernames: string[],
   conversationName: string,
 ): Promise<Conversation> {
-  const response = await fetch(`${URL}/conversations`, {
+  const response = await fetch(`${HTTP_URL}/conversations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -42,8 +42,6 @@ export async function createConversation(
 
   const data = await response.json() as ConversationResponse;
 
-  console.log(data);
-
   return {
     id: data.id,
     name: data.name,
@@ -55,7 +53,7 @@ export async function createConversation(
 }
 
 export async function getConversations(): Promise<Conversation[]> {
-  const response = await fetch(`${URL}/conversations`, {
+  const response = await fetch(`${HTTP_URL}/conversations`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -94,7 +92,7 @@ export async function sendMessage(
   conversationId: string,
 ): Promise<NewMessageResponse> {
   const response = await fetch(
-    `${URL}/conversations/${conversationId}/messages`,
+    `${HTTP_URL}/conversations/${conversationId}/messages`,
     {
       method: "POST",
       headers: {
