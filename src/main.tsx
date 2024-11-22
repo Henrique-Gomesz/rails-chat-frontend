@@ -1,6 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import { LoginPage } from "./pages/login/login.tsx";
@@ -10,7 +14,7 @@ import { SignupPage } from "./pages/signup/signup.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginPage />,
+    element: <Navigate to="/login" replace />,
   },
   {
     path: "*",
