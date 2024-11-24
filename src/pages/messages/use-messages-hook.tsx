@@ -11,11 +11,11 @@ import { conversationsAtom } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 
 type UseMessagesHook = {
-  conversations: Conversation[];
   showModal: boolean;
   newChatName: string;
   selectedUsers: string[];
   usernames: string[];
+  username: string | null;
   message: string;
   lockSendMessage: boolean;
   isLoading: boolean;
@@ -29,7 +29,10 @@ type UseMessagesHook = {
   onMessageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleModal: () => void;
   logout: () => void;
+  onGoBack: () => void;
 };
+
+const username = localStorage.getItem("username");
 
 export const useMessagesHook = (): UseMessagesHook => {
   const navigate = useNavigate();
@@ -51,6 +54,10 @@ export const useMessagesHook = (): UseMessagesHook => {
 
   function onChangeChatName(event: React.ChangeEvent<HTMLInputElement>) {
     setNewChatName(event.target.value);
+  }
+
+  function onGoBack() {
+    setSelectedChatId("");
   }
 
   useEffect(() => {
@@ -139,18 +146,19 @@ export const useMessagesHook = (): UseMessagesHook => {
   }
 
   return {
-    handleModal,
-    logout,
-    conversations,
     showModal,
     newChatName,
     selectedUsers,
     usernames,
     message,
     lockSendMessage,
+    username,
     isLoading,
     chatListRef,
     selectedChat,
+    onGoBack,
+    handleModal,
+    logout,
     onChangeChatName,
     handleUserSelection,
     handleCreateChat,

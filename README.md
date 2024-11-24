@@ -1,58 +1,46 @@
-# React + TypeScript + Vite
+# Rails Chat Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and
-some ESLint rules.
+Rails chat é uma aplicação web onde você pode criar conversas com uma ou
+múltiplas pessoas e receber as notificações em tempo real via websockets.
 
-Currently, two official plugins are available:
+O projeto foi contruído com Typescrypt e React.js para o front e Ruby on rails
+para o backend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md)
-  uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc)
-  uses [SWC](https://swc.rs/) for Fast Refresh
+Projeto implantado com [Vercel (Front-end)](https://vercel.com/) e
+[Cloud Run (Back-end)](https://cloud.google.com/run?hl=pt-BR)
 
-## Expanding the ESLint configuration
+[Rails Chat (Website)](https://rails-chat-frontend.vercel.app/)
 
-If you are developing a production application, we recommend updating the
-configuration to enable type aware lint rules:
+Repositório do backend do projeto.
 
-- Configure the top-level `parserOptions` property like this:
+[Rails Chat (Backend)](https://github.com/Henrique-Gomesz/rails-chat)
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+## Rodando localmente
+
+Clone o projeto
+
+```bash
+git clone https://github.com/Henrique-Gomesz/rails-chat-frontend
 ```
 
-- Replace `tseslint.configs.recommended` to
-  `tseslint.configs.recommendedTypeChecked` or
-  `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install
-  [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and
-  update the config:
+Entre no diretório do projeto
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
+```bash
+cd rails-chat-frontend
+```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
+Instale as dependências
+
+```bash
+deno install
+# ou
+npm install
+```
+
+Inicie o servidor
+
+```bash
+deno run dev
+# ou
+npm run dev
 ```

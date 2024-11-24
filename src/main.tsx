@@ -10,6 +10,7 @@ import "./index.css";
 import { LoginPage } from "./pages/login/login.tsx";
 import { MessagesPage } from "./pages/messages/messages.tsx";
 import { SignupPage } from "./pages/signup/signup.tsx";
+import { ProtectedRoute } from "./components/protected-route.tsx";
 
 const router = createBrowserRouter([
   {
@@ -30,7 +31,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/messages",
-    element: <MessagesPage />,
+    element: (
+      <ProtectedRoute>
+        <MessagesPage />
+      </ProtectedRoute>
+    ),
   },
 ]);
 

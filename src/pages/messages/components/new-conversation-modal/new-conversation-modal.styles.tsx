@@ -1,26 +1,5 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-
-`;
-
-export const ChatSectionContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-
-`;
-
-export const ParticipantsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 20px;
-`;
-
 export const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
