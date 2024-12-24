@@ -15,6 +15,11 @@ Repositório do backend do projeto.
 
 [Rails Chat (Backend)](https://github.com/Henrique-Gomesz/rails-chat)
 
+Demo:
+
+https://github.com/user-attachments/assets/c7f07989-a5a4-45bd-814c-ab8473186f60
+
+
 ## Rodando localmente
 
 Clone o projeto
